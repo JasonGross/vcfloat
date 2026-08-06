@@ -359,9 +359,20 @@ try reflexivity.
 all:
 unfold Binary.Bfma, Binary.BSN2B, BinarySingleNaN.Bfma, Binary.B2BSN,
 Operations.Fmult, Operations.Fplus, Operations.Falign;
-destruct (_ + _ <=? _);
-destruct (BinarySingleNaN.binary_normalize _ _ _ _ _ _ _ _); try apply I;
- solve [auto].
+first
+ [ destruct (_ + _ <=? _);
+   destruct (BinarySingleNaN.binary_normalize _ _ _ _ _ _ _ _); try apply I;
+   solve [auto]
+ | (* When the addend is a zero, Falign never fires, so the goal has no
+      [_ + _ <=? _] to destruct.  The two sides then differ only in the szero
+      argument of binary_normalize, which it consults only when the mantissa
+      is Z0, so split on the mantissa instead. *)
+   destruct (SpecFloat.cond_Zopp _ _ * SpecFloat.cond_Zopp _ _);
+   [ simpl; apply I
+   | destruct (BinarySingleNaN.binary_normalize _ _ _ _ _ _ _ _); try apply I;
+     repeat split; auto
+   | destruct (BinarySingleNaN.binary_normalize _ _ _ _ _ _ _ _); try apply I;
+     repeat split; auto ] ].
 Qed.
 
 Lemma Forall_map: forall  {A B} (P: B -> Prop) (f: A -> B) (al: list A),
@@ -542,7 +553,11 @@ repeat proof_irr;
 try solve [destruct (Binary.Bfma _ _ _ _ _ _ _ _ _); auto].
 all:
 unfold Binary.Bfma, Binary.BSN2B, BinarySingleNaN.Bfma, Binary.B2BSN; simpl;
-set (K := _ (proj1 _)); clearbody K; destruct K; simpl; auto.
+(* Flocq now passes [binary_round_valid ...] where it used to pass
+   [proj1 (binary_round_correct ...)], so the [_ (proj1 _)] pattern no
+   longer matches; name the [SF2B] application directly instead. *)
+first [ set (K := _ (proj1 _)) | set (K := BinarySingleNaN.SF2B _ _) ];
+clearbody K; destruct K; simpl; auto.
 Qed.
 
 Lemma strict_feq_i1:

@@ -650,7 +650,7 @@ destruct n; simpl; auto.
   destruct (F.fromZ_UP_correct p52 n) as [_ ?].
   set (lo := F.fromZ_DN p52 n) in *; clearbody lo.
   set (hi := F.fromZ_UP p52 n) in *; clearbody hi.
-  pose proof (le_contains _ _ _ H1 H2). clear H1 H2.
+  pose proof (conj H1 H2 : contains (Ibnd (F.toX lo) (F.toX hi)) (Xreal (IZR n))). clear H1 H2.
   destruct H3.
   unfold F.toR, proj_val.
   rewrite I.F.real_correct in H,H0.

@@ -306,7 +306,11 @@ repeat match goal with s: bool |- _ => destruct s end;
 try reflexivity;
 unfold BFMA, Binary.Bfma, BinarySingleNaN.Bfma, Binary.BSN2B, Binary.B2BSN;
 simpl;
-set (K := _ (proj1 _)); clearbody K; destruct K; simpl; auto.
+(* Flocq now passes [binary_round_valid ...] where it used to pass
+   [proj1 (binary_round_correct ...)], so the [_ (proj1 _)] pattern no
+   longer matches; name the [SF2B] application directly instead. *)
+first [ set (K := _ (proj1 _)) | set (K := BinarySingleNaN.SF2B _ _) ];
+clearbody K; destruct K; simpl; auto.
 Qed.
 
 Lemma Forall_map: forall  {A B} (P: B -> Prop) (f: A -> B) (al: list A),
@@ -584,7 +588,11 @@ repeat proof_irr;
 try solve [destruct (Binary.Bfma _ _ _ _ _ _ _ _ _); auto].
 all:
 unfold Binary.Bfma, Binary.BSN2B, BinarySingleNaN.Bfma, Binary.B2BSN; simpl;
-set (K := _ (proj1 _)); clearbody K; destruct K; simpl; auto.
+(* Flocq now passes [binary_round_valid ...] where it used to pass
+   [proj1 (binary_round_correct ...)], so the [_ (proj1 _)] pattern no
+   longer matches; name the [SF2B] application directly instead. *)
+first [ set (K := _ (proj1 _)) | set (K := BinarySingleNaN.SF2B _ _) ];
+clearbody K; destruct K; simpl; auto.
 Qed.
 
 Lemma strict_feq_i1:
